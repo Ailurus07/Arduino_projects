@@ -1,0 +1,75 @@
+#include <Servo.h>
+
+#define servoPin1 3  // Left/Right movement
+#define servoPin2 5  // Up/Down movement
+
+#define ledPin1 8    // LED for left eye
+#define ledPin2 9    // LED for right eye
+
+Servo servo1;  
+Servo servo2;  
+
+void setup() {
+    servo1.attach(servoPin1);
+    servo2.attach(servoPin2);
+    
+
+    servo1.write(90);  // Center position
+    servo2.write(90);  // Center position
+
+  
+    pinMode(ledPin1, OUTPUT);
+    pinMode(ledPin2, OUTPUT);
+
+    digitalWrite(ledPin1, LOW);
+    digitalWrite(ledPin2, LOW);
+}
+
+void loop() {
+    blinkLEDs();
+
+    // Moving the head left and right
+    moveHeadLeftRight();
+
+    // Moving the head up and down
+    moveHeadUpDown();
+}
+
+void blinkLEDs() {
+  
+    digitalWrite(ledPin1, HIGH);
+    digitalWrite(ledPin2, HIGH);
+    delay(500);
+
+    digitalWrite(ledPin1, LOW);
+    digitalWrite(ledPin2, LOW);
+    delay(500); 
+}
+
+void moveHeadLeftRight() {
+    // Moving head to the left
+    servo1.write(45);  // 45 degrees to the left
+    delay(1000); 
+
+    // Moving head to the right
+    servo1.write(135);  // 45 degrees to the right
+    delay(1000);  
+
+    // Moving head back to the center
+    servo1.write(90);   // Center position
+    delay(1000);   
+}
+
+void moveHeadUpDown() {
+    // Moving head up
+    servo2.write(45);  // 45 degrees up
+    delay(1000); 
+
+    // Moving head down
+    servo2.write(135);  // 45 degrees down
+    delay(1000);   
+
+    // Moving head back to the center
+    servo2.write(90);   // Center position
+    delay(1000);   
+}

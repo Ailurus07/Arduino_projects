@@ -15,7 +15,7 @@ The materials used are :
 
 After gathering this tools and making proper connections of all above materials, the following code was added to the UNO board:
 
-#include <Servo.h> \\ for servo libaries
+#include <Servo.h> // for servo libaries
 
 #define US1 9     // This pin will send out a sound wave; it is a pin of ultrasonic sensor
 #define US2 10    // This pin will listen for the sound wave to bounce back; another pin of ultrasonic sensor

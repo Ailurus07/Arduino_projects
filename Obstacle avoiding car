@@ -1,0 +1,130 @@
+Here is the code for Obstacle avoiding car that can avoid obstacles by thrwoing ultrasonic sounds from ultrasonic sensor and can manage it movement using servo sensor
+
+#include <Servo.h>
+
+// Pin definitions for the ultrasonic sensor
+#define trigPin 9     // This pin will send out a sound wave
+#define echoPin 10    // This pin will listen for the sound wave to bounce back
+
+// Pin definitions for the motor driver (four motors)
+#define motorAForward 4
+#define motorABackward 5
+#define motorBForward 6
+#define motorBBackward 7
+#define motorCForward 8
+#define motorCBackward 11
+#define motorDForward 12
+#define motorDBackward 13
+
+// Servo motor
+Servo servo;           // Create a Servo object
+#define servoPin 3     // Pin connected to the servo motor
+
+// Variables to store the duration of the pulse and the calculated distance
+long duration;   // How long it takes for the sound wave to bounce back
+int distance;    // The distance to the obstacle in centimeters
+
+// Function to control motor movement
+// motorForward: the pin that makes the motor go forward
+// motorBackward: the pin that makes the motor go backward
+// state: HIGH to move forward, LOW to move backward
+void moveMotor(int motorForward, int motorBackward, int state) {
+    digitalWrite(motorForward, state);        // Set the forward pin to the given state (HIGH or LOW)
+    digitalWrite(motorBackward, !state);      // Set the backward pin to the opposite state
+}
+
+void setup() {
+    // Set up the pins for the ultrasonic sensor
+    pinMode(trigPin, OUTPUT);                 // We'll be sending a signal from this pin
+    pinMode(echoPin, INPUT);                  // We'll be listening for a signal on this pin
+
+    // Set up the pins for the motors
+    pinMode(motorAForward, OUTPUT);
+    pinMode(motorABackward, OUTPUT);
+    pinMode(motorBForward, OUTPUT);
+    pinMode(motorBBackward, OUTPUT);
+    pinMode(motorCForward, OUTPUT);
+    pinMode(motorCBackward, OUTPUT);
+    pinMode(motorDForward, OUTPUT);
+    pinMode(motorDBackward, OUTPUT);
+
+    // Initially, make sure all the motors are stopped
+    digitalWrite(motorAForward, LOW);
+    digitalWrite(motorABackward, LOW);
+    digitalWrite(motorBForward, LOW);
+    digitalWrite(motorBBackward, LOW);
+    digitalWrite(motorCForward, LOW);
+    digitalWrite(motorCBackward, LOW);
+    digitalWrite(motorDForward, LOW);
+    digitalWrite(motorDBackward, LOW);
+
+    // Start the serial communication so we can see the distance readings on the computer
+    Serial.begin(9600);
+
+    // Attach the servo motor to the specified pin
+    servo.attach(servoPin);
+    servo.write(90);  // Start with the servo at 90 degrees (facing forward)
+}
+
+void loop() {
+    // Scan the area by rotating the servo
+    for (int angle = 0; angle <= 180; angle += 30) {
+        servo.write(angle);
+        delay(500);  // Wait for the servo to move to the position
+        measureDistance();
+        delay(500);  // Give some time for stable distance reading
+
+        // Check if the distance is less than 20 cm (an obstacle is close)
+        if (distance < 20) {
+            // Stop all the motors
+            moveMotor(motorAForward, motorABackward, LOW);
+            moveMotor(motorBForward, motorBBackward, LOW);
+            moveMotor(motorCForward, motorCBackward, LOW);
+            moveMotor(motorDForward, motorDBackward, LOW);
+            delay(500);  // Pause for a moment
+
+            // Move backward to get away from the obstacle
+            moveMotor(motorAForward, motorABackward, LOW);
+            moveMotor(motorBForward, motorBBackward, LOW);
+            moveMotor(motorCForward, motorCBackward, LOW);
+            moveMotor(motorDForward, motorDBackward, LOW);
+            delay(500);  // Move back for a short time
+
+            // Turn right to avoid the obstacle
+            moveMotor(motorAForward, motorABackward, HIGH);
+            moveMotor(motorBForward, motorBBackward, HIGH);
+            moveMotor(motorCForward, motorCBackward, LOW);
+            moveMotor(motorDForward, motorDBackward, LOW);
+            delay(500);  // Turn for a short time
+        } else {
+            // If no obstacle is close, keep moving forward
+            moveMotor(motorAForward, motorABackward, HIGH);
+            moveMotor(motorBForward, motorBBackward, HIGH);
+            moveMotor(motorCForward, motorCBackward, HIGH);
+            moveMotor(motorDForward, motorDBackward, HIGH);
+        }
+    }
+
+    // Small delay to let the sensor settle
+    delay(100);
+}
+
+// Function to measure distance using the ultrasonic sensor
+void measureDistance() {
+    // Send out a sound wave by making the trigPin HIGH for a short time
+    digitalWrite(trigPin, LOW);               // Ensure the trigPin is LOW
+    delayMicroseconds(2);                     // Wait for 2 microseconds
+    digitalWrite(trigPin, HIGH);              // Send a 10 microsecond pulse
+    delayMicroseconds(10);                    // Wait for 10 microseconds
+    digitalWrite(trigPin, LOW);               // Stop the pulse
+
+    // Read the echoPin to get the duration of the echo
+    duration = pulseIn(echoPin, HIGH);        // Measure the time it takes for the echo to return
+
+    // Calculate the distance based on the duration
+    distance = duration * 0.034 / 2;          // Convert the time into a distance
+
+    // Print the distance to the Serial Monitor
+    Serial.print("Distance: ");
+    Serial.println(distance);
+}
